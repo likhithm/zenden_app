@@ -44,6 +44,7 @@ class LoginScreenState extends State<LoginScreen> {
   bool isLoggedIn = false;
   FirebaseUser currentUser;
   bool check = false;
+  bool checkProfile;
 
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -72,10 +73,36 @@ class LoginScreenState extends State<LoginScreen> {
     });
 
     prefs = await SharedPreferences.getInstance();
+    checkProfile = await checkForProfile(prefs.getString('id'));
+
+    firebaseAuth.currentUser().then((FirebaseUser user) async  {
+      if (user?.uid != null && prefs.get('email') != null) {
+
+
+     checkProfile?Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MainScreen(
+                  currentUserId: prefs.getString('id'),
+                  currentUserEmail: prefs.getString('email'))),
+        ):
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => SubmitProfilePage(
+                  currentUserId: prefs.getString('id'),
+                  currentUserEmail: prefs.getString('email'))
+          ),
+        );
+      }
+    });
+
+
     isLoggedIn = await googleSignIn.isSignedIn();
 
     if (isLoggedIn) {
-      /*Navigator.push(
+
+      checkProfile?Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => MainScreen(
@@ -83,7 +110,7 @@ class LoginScreenState extends State<LoginScreen> {
                 currentUserEmail: prefs.getString('email')
             )
         ),
-      );*/
+      ):
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -95,25 +122,7 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     //print("email:"+prefs.getString('email'));
-     firebaseAuth.currentUser().then((FirebaseUser user) {
-      if (user?.uid != null && prefs.get('email') != null) {
-      /*  Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MainScreen(
-                  currentUserId: prefs.getString('id'),
-                  currentUserEmail: prefs.getString('email'))),
-        );*/
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SubmitProfilePage(
-                  currentUserId: prefs.getString('id'),
-                  currentUserEmail: prefs.getString('email'))
-          ),
-        );
-      }
-    });
+
 
     if(!isLoggedIn && prefs.get('email') == null){
     this.setState(() {
@@ -144,7 +153,7 @@ class LoginScreenState extends State<LoginScreen> {
                   width: size.width,
                   height: size.height,
                   decoration: BoxDecoration(
-                      color: Colors.transparent.withOpacity(0.7)),
+                      color: Colors.transparent.withOpacity(0.5)),
                 ),
               ),
               Container(
@@ -153,29 +162,48 @@ class LoginScreenState extends State<LoginScreen> {
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                        Container(
-                            margin: EdgeInsets.only(left: 20.0, right: 20.0),
-                            child: registerForm(context)),
-                        Container(
-                          margin: EdgeInsets.only(top: 20.0, bottom: 20.0),
-                          child:
-                              Text("Or", style: TextStyle(color: Colors.white)),
-                        ),
-                        RaisedButton.icon(
-                          onPressed: _submittable() ? handleGoogleSignIn: null,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          icon: Icon(FontAwesomeIcons.google,
-                              color: Colors.white),
-                          label: Text('Sign in with Google',
-                              style: TextStyle(color: Colors.white)),
-                          color: Colors.red,
-                          highlightColor: Colors.redAccent,
-                          splashColor: Colors.transparent,
-                          textColor: Colors.white,
-                        ),
-                      ]))),
+                            Image.asset(
+                              'assets/zenden_logo.png', height: 60,width: 60,
+                            ),
+
+                            Container(
+                              margin: EdgeInsets.only(top:10),
+                              child:
+                              Text("Zenden",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'Katibeh',
+                                  color:Colors.white,
+                                  fontSize: 24)
+                              )
+                            ),
+
+                            Container(
+                                margin: EdgeInsets.only(left: 20.0, right: 20.0,top:40),
+                                child: registerForm(context)),
+                            Container(
+                              margin: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                              child:
+                                  Text("Or", style: TextStyle(color: Colors.white)),
+                            ),
+                            RaisedButton.icon(
+                              onPressed: _submittable() ? handleGoogleSignIn: null,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
+                              icon: Icon(FontAwesomeIcons.google,
+                                  color: Colors.white),
+                              label: Text('Sign in with Google',
+                                  style: TextStyle(color: Colors.white)),
+                              color: Colors.red,
+                              highlightColor: Colors.redAccent,
+                              splashColor: Colors.transparent,
+                              textColor: Colors.white,
+                            ),
+                          ]
+                      )
+                  )
+              ),
               // Loading
               Positioned(
                 child: isLoading
@@ -203,6 +231,8 @@ class LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          const SizedBox(height: 5.0),
+
           TextFormField(
             style: TextStyle(color: Colors.white),
             controller: emailController,
@@ -218,6 +248,9 @@ class LoginScreenState extends State<LoginScreen> {
               hintStyle: TextStyle(color: Colors.grey),
               hintText: "example@gmail.com",
               errorStyle: TextStyle(color: Colors.white),
+              enabledBorder: const OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.white),
+              )
             ),
             //autovalidate: true,
             validator: (String value) {
@@ -240,6 +273,9 @@ class LoginScreenState extends State<LoginScreen> {
               labelText: 'Password',
               labelStyle: TextStyle(color: Colors.white),
               errorStyle: TextStyle(color: Colors.white),
+              enabledBorder: const OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.white),
+              )
             ),
             controller: passwordController,
             validator: (String value) {
@@ -405,7 +441,7 @@ class LoginScreenState extends State<LoginScreen> {
         Firestore.instance
           .collection('app_users')
           .document(firebaseUser.uid)
-          .setData({'emailId': firebaseUser.email,});
+          .setData({'emailId': firebaseUser.email, 'profileSubmitted':false});
 
         // Write data to local
         currentUser = firebaseUser;
@@ -497,7 +533,7 @@ class LoginScreenState extends State<LoginScreen> {
           Firestore.instance
               .collection('app_users')
               .document(firebaseUser.uid)
-              .setData({'emailId': emailController.text});
+              .setData({'emailId': emailController.text,'profileSubmitted':false});
 
           await prefs.setString('id', firebaseUser.uid);
           await prefs.setString('email', emailController.text);
@@ -577,5 +613,30 @@ class LoginScreenState extends State<LoginScreen> {
         );
       },
     );
+  }
+
+  Future<bool> checkForProfile(String id) async {
+    if(id!=null){
+      try {
+        await
+        Firestore.instance
+            .collection('app_users')
+            .document(id)
+            .get()
+            .then((DocumentSnapshot ds) {
+          if(ds['profileSubmitted']) {
+              return true;
+          }
+          else{
+            return false;
+          }
+        });
+      }
+      catch(e){
+        print("Exception caught in checkForCarPoolEnroll");
+      }
+    }
+
+    return false;
   }
 }

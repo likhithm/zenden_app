@@ -92,7 +92,7 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
             ConstrainedBox(
               constraints: BoxConstraints.expand(),
               child: Image.asset(
-                'assets/background.gif',
+                'assets/house.jpg',
                 fit: BoxFit.fitHeight,
               ),
             ),
@@ -126,6 +126,38 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
            mainAxisAlignment: MainAxisAlignment.center,
             // crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              const SizedBox(height: 10.0),
+
+              TextFormField(
+                style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
+                controller: _emailController,
+                cursorColor: Colors.white,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                    icon: Icon(
+                      Icons.email,
+                      color: Colors.white,
+                    ),
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: themeColor,fontSize: 18),
+                    hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
+                    hintText: "example@gmail.com",
+                    errorStyle: TextStyle(color: Colors.red),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white),
+                    )
+
+                ),
+                validator: (String value) {
+                  if (value.trim().isEmpty || !value.contains("@")||!value.contains(".")) {
+                    return 'Invalid Email address';
+                  }
+                  else return null;
+                },
+              ),
+
+              const SizedBox(height: 20.0),
+
               TextFormField(
                 style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
                 controller: _nameController,
@@ -134,13 +166,16 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
                 decoration: InputDecoration(
                   icon: Icon(
                     Icons.person,
-                    color: themeColor,
+                    color: Colors.white,
                   ),
                   labelText: 'Name',
                   labelStyle: TextStyle(color: themeColor,fontSize: 18),
                   hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
                   hintText: "First_name  Last_name",
                   errorStyle: TextStyle(color: Colors.red),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.white),
+                  ) ,
                 ),
                 //autovalidate: true,
                 validator: (String value) {
@@ -153,31 +188,62 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
 
               const SizedBox(height: 20.0),
 
+
               TextFormField(
                 style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
-                controller: _emailController,
+                controller: _phoneController,
                 cursorColor: Colors.white,
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   icon: Icon(
-                    Icons.email,
-                    color: themeColor,
+                    Icons.phone,
+                    color: Colors.white,
                   ),
-                  labelText: 'Email',
+                  labelText: 'Phone Number',
                   labelStyle: TextStyle(color: themeColor,fontSize: 18),
                   hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
-                  hintText: "example@gmail.com",
+                  hintText: "+14081110000",
                   errorStyle: TextStyle(color: Colors.red),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.white),
+                  )
+
                 ),
-                validator: (String value) {
-                  if (value.trim().isEmpty || !value.contains("@")||!value.contains(".")) {
-                    return 'Invalid Email address';
-                  }
-                  else return null;
-                },
+                autovalidate: true,
               ),
 
               const SizedBox(height: 20.0),
+
+              TextFormField(
+                style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
+                controller: _ageController,
+                cursorColor: Colors.white,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.date_range,
+                    color: Colors.white,
+                  ),
+                  labelText: 'Age',
+                  labelStyle: TextStyle(color: themeColor,fontSize: 18),
+                  hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
+                  hintText: "21",
+                  errorStyle: TextStyle(color: Colors.red),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.white),
+                  )
+
+                ),
+                //autovalidate: true,
+                validator: (String value) {
+                  if (value.trim().isEmpty || value.length<=16||value.contains('-')||value.contains(',')||value.contains('.')) {
+                    return 'Invalid Age';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 30.0),
 
 
               InkWell(
@@ -185,21 +251,22 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>
                   [
-                    Icon(Icons.location_on,color:themeColor
+                    Icon(Icons.location_on,color:Colors.white
                     ),
                     Divider(indent: 15),
                     Expanded(child:Container
                       (
                         decoration: BoxDecoration(
                           border: Border(
-                            bottom: BorderSide(width: 1.0, color: Colors.grey),
+                            bottom: BorderSide(width: 1.0, color: Colors.white),
+
                           ),
                         ),
                         child:
                         _addressController.text.length<=1?
                         Container(
                             margin: EdgeInsets.only(bottom: 10.0,left: 1.0),
-                            child:Text("Location",
+                            child:Text("  Location",
                                 style:TextStyle(
                                     color:themeColor,
                                     fontSize: 18,
@@ -222,51 +289,8 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
                 },
               ),
 
-              const SizedBox(height: 20.0),
+              const SizedBox(height: 25.0),
 
-              TextFormField(
-                style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
-                controller: _phoneController,
-                cursorColor: Colors.white,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.phone,
-                    color: themeColor,
-                  ),
-                  labelText: 'Phone Number',
-                  labelStyle: TextStyle(color: themeColor,fontSize: 18),
-                  hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
-                  hintText: "+14081110000",
-                  errorStyle: TextStyle(color: Colors.red),
-                ),
-                autovalidate: true,
-              ),
-
-              TextFormField(
-                style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
-                controller: _ageController,
-                cursorColor: Colors.white,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.date_range,
-                    color: themeColor,
-                  ),
-                  labelText: 'Age',
-                  labelStyle: TextStyle(color: themeColor,fontSize: 18),
-                  hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
-                  hintText: "21",
-                  errorStyle: TextStyle(color: Colors.red),
-                ),
-                //autovalidate: true,
-                validator: (String value) {
-                  if (value.trim().isEmpty || value.length<=16||value.contains('-')||value.contains(',')||value.contains('.')) {
-                    return 'Invalid Age';
-                  }
-                  return null;
-                },
-              ),
               new Container(
                   margin: const EdgeInsets.only(left: 100.0, right:100.0, top: 25.0),
                   child: registerButton()
@@ -314,6 +338,18 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
 
   }
 
+  Future<void> _handleSubmitButton() async {
+
+    await Firestore.instance
+        .collection('app_users')
+        .document(widget.currentUserEmail)
+        .updateData({'name': widget.currentUserEmail,
+          'phone':_phoneController.text,
+          'age':_ageController.text,
+          'location': _addressController.text,
+          'geo_point': GeoPoint(lat, lng)});
+  }
+
   ///----------------- Background Functions ---------------------------
 
   Future<void> _handlePressButton() async {
@@ -336,15 +372,15 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
 
 
   Future<String> displayPrediction(Prediction p) async {
-    GeoPoint gp;
+    //GeoPoint gp;
     String address;
     if (p != null) {
       PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
-      /*setState(() {
+      setState(() {
         lat = detail.result.geometry.location.lat;
         lng = detail.result.geometry.location.lng;
-        gp = new GeoPoint(lat, lng);
-      });*/
+        //gp = new GeoPoint(lat, lng);
+      });
       address = p.description;
     }
     return address;
