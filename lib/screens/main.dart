@@ -1,17 +1,23 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:convert' show utf8;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter/scheduler.dart' show timeDilation;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:flutter_tindercard/flutter_tindercard.dart';
 
 import 'package:zenden_app/chat/chat_main_screen.dart';
 import 'package:zenden_app/notification/notification_screen.dart';
 import 'package:zenden_app/screens/login.dart';
+import 'package:zenden_app/house/House.dart';
+
 
 
 
@@ -19,7 +25,6 @@ import 'package:zenden_app/screens/login.dart';
 
 void main() => runApp(MyApp());
 
-/// This Widget is the main application widget.
 
 
 class MainScreen extends StatefulWidget {
@@ -34,7 +39,7 @@ class MainScreen extends StatefulWidget {
   State createState() => MainScreenState();
 }
 
-class MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
   final String currentUserId;
   final String currentUserEmail;
 
@@ -42,8 +47,12 @@ class MainScreenState extends State<MainScreen> {
       {Key key, @required this.currentUserId, @required this.currentUserEmail});
 
 
+  List<Data> houses = List();
   bool check;
   bool empty;
+  bool hasLoaded = false;
+
+  int i=0;
 
   final Color themeColor = Color.fromRGBO(24, 154, 255, 1);
 
@@ -51,12 +60,37 @@ class MainScreenState extends State<MainScreen> {
 
   //final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
+
+
+  List<String> welcomeImages = [
+    "assets/house.jpg",
+    "assets/background.gif",
+    "assets/house.jpg",
+    "assets/house.jpg",
+    "assets/house.jpg",
+    "assets/house.jpg"
+  ];
+
   @override
   void initState() {
     super.initState();
 
     check = false;
     empty = false;
+
+    http
+        .get(
+        'https://zenden-api-heroku.herokuapp.com/api/Predictions?user_id=1')
+        .then((res) => (res.body))
+        .then(json.decode)
+        .then((map) => map["data"])
+        .then((data) => data.forEach(addHouse))
+        .catchError(onError)
+        .then((e) {
+      setState(() {
+        hasLoaded = true;
+      });
+    });
 
 
     /* if (Platform.isIOS) iOS_Permission();
@@ -94,8 +128,23 @@ class MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  void addHouse(item) {
+    setState(() {
+      houses.add(Data.fromJson(item));
+    });
+
+  }
+
+  void onError(dynamic d) {
+    print(d);
+    setState(() {
+      hasLoaded = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    CardController controller;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -198,11 +247,35 @@ class MainScreenState extends State<MainScreen> {
         onWillPop: () {
           return;
         },
-        child: Center(
+        //child:  //new Center(
             child: Container(
-                child: Text("Welcome")
-            )
-        ),
+               // height: MediaQuery.of(context).size.height * 0.6,
+                child: new TinderSwapCard(
+                    orientation: AmassOrientation.TOP,
+                    totalNum: 6,
+                    stackNum: 2,
+                    swipeEdge: 4.0,
+                    maxWidth: MediaQuery.of(context).size.width,
+                    maxHeight: MediaQuery.of(context).size.height,
+                    minWidth: MediaQuery.of(context).size.width*0.95,
+                    minHeight: MediaQuery.of(context).size.height * 0.8,
+                    cardBuilder: (context, index) => Card(
+                      child: Image.asset('${welcomeImages[index]}',fit:BoxFit.fitHeight),
+                    ),
+                    cardController: controller = CardController(),
+                    swipeUpdateCallback:
+                        (DragUpdateDetails details, Alignment align) {
+                      /// Get swiping card's alignment
+                      if (align.x < 0) {
+                        //Card is LEFT swiping
+                      } else if (align.x > 0) {
+                        //Card is RIGHT swiping
+                      }
+                    },
+                    swipeCompleteCallback:
+                        (CardSwipeOrientation orientation, int index) {
+                      /// Get orientation & index of swiped card!
+                    }))//),
       ),
     );
   }

@@ -44,7 +44,7 @@ class LoginScreenState extends State<LoginScreen> {
   bool isLoggedIn = false;
   FirebaseUser currentUser;
   bool check = false;
-  bool checkProfile;
+  bool checkProfile = false;
 
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -73,7 +73,8 @@ class LoginScreenState extends State<LoginScreen> {
     });
 
     prefs = await SharedPreferences.getInstance();
-    checkProfile = await checkForProfile(prefs.getString('id'));
+    await checkForProfile(prefs.getString('id'));
+
 
     firebaseAuth.currentUser().then((FirebaseUser user) async  {
       if (user?.uid != null && prefs.get('email') != null) {
@@ -615,7 +616,7 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<bool> checkForProfile(String id) async {
+  Future<void> checkForProfile(String id) async {
     if(id!=null){
       try {
         await
@@ -625,10 +626,9 @@ class LoginScreenState extends State<LoginScreen> {
             .get()
             .then((DocumentSnapshot ds) {
           if(ds['profileSubmitted']) {
-              return true;
-          }
-          else{
-            return false;
+             setState(() {
+               checkProfile = true;
+             });
           }
         });
       }

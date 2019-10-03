@@ -126,7 +126,21 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
            mainAxisAlignment: MainAxisAlignment.center,
             // crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const SizedBox(height: 10.0),
+              Image.asset(
+                'assets/zenden_logo.png', height: 60,width: 60,
+              ),
+
+              Container(
+                  margin: EdgeInsets.only(top:10,bottom: 20 ),
+                  child:
+                  Text("Zenden",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'Katibeh',
+                          color:Colors.white,
+                          fontSize: 24)
+                  )
+              ),
 
               TextFormField(
                 style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 18),
@@ -202,14 +216,18 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
                   labelText: 'Phone Number',
                   labelStyle: TextStyle(color: themeColor,fontSize: 18),
                   hintStyle: TextStyle(color: Colors.grey,fontWeight: FontWeight.w500,),
-                  hintText: "+14081110000",
+                  hintText: "4081110000",
                   errorStyle: TextStyle(color: Colors.red),
                   enabledBorder: const OutlineInputBorder(
                     borderSide: const BorderSide(color: Colors.white),
                   )
-
                 ),
-                autovalidate: true,
+                validator: (String value) {
+                  if (value.length==10) {
+                    return null;
+                  }
+                  return 'Invalid Age';
+                },
               ),
 
               const SizedBox(height: 20.0),
@@ -236,7 +254,7 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
                 ),
                 //autovalidate: true,
                 validator: (String value) {
-                  if (value.trim().isEmpty || value.length<=16||value.contains('-')||value.contains(',')||value.contains('.')) {
+                  if (value.trim().isEmpty || int.parse(value)<16||value.contains('-')||value.contains(',')||value.contains('.')) {
                     return 'Invalid Age';
                   }
                   return null;
@@ -321,16 +339,7 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
                   color: Colors.white),
             ),
             onPressed:() {
-              controller.forward(from: 0.0);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => MainScreen(
-                        currentUserId: widget.currentUserId,
-                        currentUserEmail: widget.currentUserEmail
-                    )
-                ),
-              );
+              _handleSubmitButton(controller);
             }
         );
       },
@@ -338,16 +347,35 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
 
   }
 
-  Future<void> _handleSubmitButton() async {
+  Future<void> _handleSubmitButton(AnimationController controller) async {
+
+    _formKey.currentState.validate();
 
     await Firestore.instance
         .collection('app_users')
+        .document(widget.currentUserId)
+        .updateData({'profileSubmitted': true});
+
+    await Firestore.instance
+        .collection('profile')
         .document(widget.currentUserEmail)
-        .updateData({'name': widget.currentUserEmail,
+        .setData({'name': widget.currentUserEmail,
           'phone':_phoneController.text,
           'age':_ageController.text,
           'location': _addressController.text,
           'geo_point': GeoPoint(lat, lng)});
+
+    controller.forward(from: 0.0);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => MainScreen(
+              currentUserId: widget.currentUserId,
+              currentUserEmail: widget.currentUserEmail
+          )
+      ),
+    );
   }
 
   ///----------------- Background Functions ---------------------------

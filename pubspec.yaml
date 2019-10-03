@@ -39,6 +39,7 @@ dependencies:
   flutter_google_places: ^0.1.4+1
   geocoder: ^0.1.2
   intl: ^0.15.7
+  flutter_tindercard: ^0.1.8
 
 
 dev_dependencies:
@@ -53,6 +54,8 @@ flutter:
   - assets/zenden_logo.png
   - assets/background.gif
   - assets/house.jpg
+  - assets/h1.jpg
+  - assets/h2.jpg
 
   fonts:
   - family: Lobster
