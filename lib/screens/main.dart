@@ -6,10 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/scheduler.dart' show timeDilation;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 
@@ -17,6 +18,7 @@ import 'package:zenden_app/chat/chat_main_screen.dart';
 import 'package:zenden_app/notification/notification_screen.dart';
 import 'package:zenden_app/screens/login.dart';
 import 'package:zenden_app/house/House.dart';
+import 'package:zenden_app/screens/details.dart';
 
 
 
@@ -65,11 +67,12 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
   List<String> welcomeImages = [
     "assets/house.jpg",
     "assets/background.gif",
+    "assets/h1.jpg",
+    "assets/h2.jpg",
     "assets/house.jpg",
-    "assets/house.jpg",
-    "assets/house.jpg",
-    "assets/house.jpg"
+    "assets/background.gif"
   ];
+
 
   @override
   void initState() {
@@ -247,7 +250,6 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
         onWillPop: () {
           return;
         },
-        //child:  //new Center(
             child: Container(
                // height: MediaQuery.of(context).size.height * 0.6,
                 child: new TinderSwapCard(
@@ -259,8 +261,18 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                     maxHeight: MediaQuery.of(context).size.height,
                     minWidth: MediaQuery.of(context).size.width*0.95,
                     minHeight: MediaQuery.of(context).size.height * 0.8,
-                    cardBuilder: (context, index) => Card(
-                      child: Image.asset('${welcomeImages[index]}',fit:BoxFit.fitHeight),
+                    cardBuilder: (context, imgIndex) => Card(
+                      child: GestureDetector(
+                        child:Image.asset('${welcomeImages[imgIndex]}',fit:BoxFit.fitHeight),
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DetailPage(welcomeImages[imgIndex])
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     cardController: controller = CardController(),
                     swipeUpdateCallback:
@@ -274,8 +286,12 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                     },
                     swipeCompleteCallback:
                         (CardSwipeOrientation orientation, int index) {
+
                       /// Get orientation & index of swiped card!
-                    }))//),
+                    }
+                )
+
+            ),
       ),
     );
   }
