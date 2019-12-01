@@ -222,8 +222,14 @@ class LoginScreenState extends State<LoginScreen> {
             ],
           ))
         : Container(
-            color: Colors.white,
-          );
+               color: Color.fromRGBO(24, 154, 255, 1),
+               /* Center(child:Image.asset(
+                'assets/house.jpg',filterQuality: FilterQuality.high,)),*/
+                child: Center(
+                   child:Image.asset(
+                        'assets/zenden_logo.png', height: 100,width: 100,
+                      )
+        ));
   }
 
   Widget registerForm(BuildContext context) {

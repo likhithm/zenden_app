@@ -359,10 +359,11 @@ class SubmitProfilePageState extends State<SubmitProfilePage> {
     await Firestore.instance
         .collection('profile')
         .document(widget.currentUserEmail)
-        .setData({'name': widget.currentUserEmail,
+        .setData({'name': _nameController.text,
           'phone':_phoneController.text,
           'age':_ageController.text,
           'location': _addressController.text,
+          'photoUrl': '',
           'geo_point': GeoPoint(lat, lng)});
 
     controller.forward(from: 0.0);

@@ -8,17 +8,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 import 'package:zenden_app/chat/chat_main_screen.dart';
 import 'package:zenden_app/notification/notification_screen.dart';
 import 'package:zenden_app/screens/login.dart';
 import 'package:zenden_app/house/House.dart';
 import 'package:zenden_app/screens/details.dart';
+import 'package:zenden_app/screens/profile.dart';
 
 
 
@@ -54,36 +55,39 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
   bool empty;
   bool hasLoaded = false;
 
+  List<String> welcomeImages= List();
+  int length;
+
   int i=0;
 
   final Color themeColor = Color.fromRGBO(24, 154, 255, 1);
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  //final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
 
 
-  List<String> welcomeImages = [
+  /*List<String> welcomeImages = [
     "assets/house.jpg",
     "assets/background.gif",
     "assets/h1.jpg",
     "assets/h2.jpg",
     "assets/house.jpg",
     "assets/background.gif"
-  ];
+  ];*/
 
 
   @override
   void initState() {
     super.initState();
-
+   // prefs = await SharedPreferences.getInstance();
     check = false;
     empty = false;
 
     http
         .get(
-        'https://zenden-api-heroku.herokuapp.com/api/Predictions?user_id=1')
+        'https://zenden-api-heroku.herokuapp.com/api/Predictions?user_id=2')
         .then((res) => (res.body))
         .then(json.decode)
         .then((map) => map["data"])
@@ -91,12 +95,18 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
         .catchError(onError)
         .then((e) {
       setState(() {
+        for(int i=0;i<houses.length;i++){
+          welcomeImages.add(houses[i].urls.split(" ")[0]);
+          //print(welcomeImages[i]);
+        }
+        length = houses.length;
         hasLoaded = true;
       });
+
     });
 
 
-    /* if (Platform.isIOS) iOS_Permission();
+     if (Platform.isIOS) iOS_Permission();
 
     _firebaseMessaging.getToken().then((String token) {
       //print("token"+token);
@@ -104,11 +114,13 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        addNotification(message,'notification');
+        //addNotification(message,'notification');
+
 
       },
       onResume: (Map<String, dynamic> message) async {
-        addNotification(message,'data');
+        //addNotification(message,'data');
+
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => NotificationPage(currentUserId)),
@@ -116,25 +128,26 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
 
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print(message.toString());
-        addNotification(message,'data'); //custom data
+        //addNotification(message,'data'); //custom data
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => NotificationPage(currentUserId)),
         );
       },
-    );*/
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
+    houses.clear();
   }
 
   void addHouse(item) {
     setState(() {
       houses.add(Data.fromJson(item));
     });
+
 
   }
 
@@ -226,35 +239,45 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
               itemBuilder: (BuildContext context, int index) {
                 return index == 0
                 ? Container(
-                   color:themeColor,
+                   color:Color.fromRGBO(24, 160, 255, 1),
                    child:
                     ListTile(
-                      title: Text("Menu",style:TextStyle(fontSize: 18,color:Colors.white)),
+                      title: Text(widget.currentUserEmail,style:TextStyle(fontSize: 16,color:Colors.white)),
                    )
                   )
                   : ListTile(
                   leading: Icon(
-                    FontAwesomeIcons.home,
+                    index==1?Icons.person:FontAwesomeIcons.home,
                     color: themeColor,
                   ),
-                  title: Text("item " + index.toString()),
-                  onTap: () {
-                    //Navigator.pop(context);
-                  },
+                  title: Text(index==1?"Profile":"Post",style:TextStyle(fontWeight: FontWeight.w600)),
+                  onTap: (){
+                     // if(index==1) {
+                       // print("hi");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  Settings(widget.currentUserEmail)
+                          ),
+                        );
+                      //}
+                    }
                 );
               }
           )
       ),
 
-      body: WillPopScope(
+      body: hasLoaded?WillPopScope(
         onWillPop: () {
+          exit(0);
           return;
         },
             child: Container(
                // height: MediaQuery.of(context).size.height * 0.6,
                 child: new TinderSwapCard(
                     orientation: AmassOrientation.TOP,
-                    totalNum: 6,
+                    totalNum: length,
                     stackNum: 2,
                     swipeEdge: 4.0,
                     maxWidth: MediaQuery.of(context).size.width,
@@ -262,15 +285,55 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                     minWidth: MediaQuery.of(context).size.width*0.95,
                     minHeight: MediaQuery.of(context).size.height * 0.8,
                     cardBuilder: (context, imgIndex) => Card(
+
                       child: GestureDetector(
-                        child:Image.asset('${welcomeImages[imgIndex]}',fit:BoxFit.fitHeight),
-                        onTap: (){
-                          Navigator.push(
+                        child:Image.network('${welcomeImages[imgIndex]}',fit:BoxFit.fitHeight),
+                       /* child:CarouselSlider(
+                          // height: _appBarHeight,
+                          aspectRatio: 0.45 ,
+                          viewportFraction: 0.9,
+                          initialPage: 0,
+                          enableInfiniteScroll: false,
+                          reverse: false,
+                          autoPlay: false,
+                          autoPlayInterval: Duration(seconds:5),
+                          autoPlayAnimationDuration: Duration(milliseconds: 5000),
+                          //autoPlayCurve: Curve.,
+                          pauseAutoPlayOnTouch: Duration(seconds: 5),
+                          enlargeCenterPage: true,
+                          items: houses[imgIndex].urls.trim().split(" ").map((i) {
+                            return Builder(
+                              builder: (BuildContext context) {
+                                return Container(
+
+                                  //width: width.value,
+                                  // height: _appBarHeight,
+                                  decoration: new BoxDecoration(
+                                    image: DecorationImage(
+                                        image: new NetworkImage(
+                                            i),
+                                        fit:BoxFit.fill
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }).toList(),
+                        ),*/
+
+                        onTap: () async {
+                          bool result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DetailPage(welcomeImages[imgIndex])
+                                builder: (context) => DetailPage(welcomeImages[imgIndex],houses[imgIndex])
                             ),
                           );
+                          if(result){
+                            controller.triggerRight();
+                          }
+                          else{
+                            controller.triggerLeft();
+                          }
                         },
                       ),
                     ),
@@ -292,7 +355,14 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                 )
 
             ),
-      ),
+      ):
+        Container(
+          child:
+            Center(child:CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(themeColor),)
+          ),
+        )
     );
   }
 
@@ -329,5 +399,33 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
       ),
     );
   }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true)
+    );
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings)
+    {
+      print("Settings registered: $settings");
+    });
+  }
+
+  Future<Null> addNotification(Map<String, dynamic> message, String notificationOrData) async {
+    print (message);
+    try {
+      final notification = message[notificationOrData];
+      await Firestore.instance
+          //.collection('app_users')
+          //.document(currentUserId)
+          .collection('notifications')
+          .add(
+        {'body':notification['body'].toString(),'read':false,'title':notification['title'].toString(),'day':'Today'},
+      );
+    } catch (exception) {
+      print("exception caught in add notification");
+    }
+  }
+
 
 }

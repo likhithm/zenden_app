@@ -1,11 +1,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:zenden_app/house/House.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class DetailPage extends StatefulWidget {
   final String img;
+  final Data house;
+ // final int index;
 
-  DetailPage(this.img);
+  DetailPage(this.img,this.house);
   @override
   _DetailPageState createState() => new _DetailPageState();
 }
@@ -59,25 +64,28 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    timeDilation = 0.7;
-    return new Theme(
+    timeDilation = 0.5;
+    return Theme(
       data: new ThemeData(
         brightness: Brightness.light,
         primaryColor: Colors.white,
         platform: Theme.of(context).platform,
       ),
+
       child: new Container(
         width: width.value,
         height: heigth.value,
         color: Colors.white,
         child: new Hero(
           tag: "img",
-          child: new Card(
+          child:
+            new Card(
             color: Colors.transparent,
             child: new Container(
               alignment: Alignment.center,
               width: width.value,
               height: heigth.value,
+
               decoration: new BoxDecoration(
                 color: Colors.white,
                 borderRadius: new BorderRadius.circular(10.0),
@@ -111,7 +119,39 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                           background: new Stack(
                             fit: StackFit.expand,
                             children: <Widget>[
-                              new Container(
+                              CarouselSlider(
+                               // height: _appBarHeight,
+                                aspectRatio: 1 ,
+                                viewportFraction: 0.99,
+                                initialPage: 0,
+                                enableInfiniteScroll: true,
+                                reverse: false,
+                                autoPlay: true,
+                                autoPlayInterval: Duration(seconds: 3),
+                                autoPlayAnimationDuration: Duration(milliseconds: 3000),
+                                //autoPlayCurve: Curve.,
+                                pauseAutoPlayOnTouch: Duration(seconds: 4),
+                                enlargeCenterPage: true,
+                                items: widget.house.urls.trim().split(" ").map((i) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return Container(
+
+                                        //width: width.value,
+                                       // height: _appBarHeight,
+                                        decoration: new BoxDecoration(
+                                          image: DecorationImage(
+                                              image: new NetworkImage(
+                                                  i),
+                                              fit:BoxFit.fill
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                              )
+                              /*new Container(
                                 width: width.value,
                                 height: _appBarHeight,
                                 decoration: new BoxDecoration(
@@ -121,7 +161,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                     fit:BoxFit.fill
                                   ),
                                 ),
-                              ),
+                              ),*/
                             ],
                           ),
                         ),
@@ -151,12 +191,13 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                           children: <Widget>[
                                             new Icon(
                                               Icons.access_time,
-                                              color: themeColor,
-                                            ),
+                                              color: widget.house.city=="Cupertino"?Colors.green:widget.house.city=="Campbell"||widget.house.city=="SanJose"||widget.house.city=="SunnyVale"||widget.house.city=="SantaClara"?Colors.blue:Colors.red
+
+                                  ),
                                             new Padding(
                                               padding:
                                               const EdgeInsets.all(8.0),
-                                              child: new Text("Posted 10 min ago"),
+                                              child: new Text( widget.house.city=="Cupertino"?"Posted 10 min ago":widget.house.city=="Campbell"||widget.house.city=="SanJose"||widget.house.city=="SunnyVale"||widget.house.city=="SantaClara"?"Posted 1 hour ago":"Posted 1 day ago"),
                                             )
                                           ],
                                         ),
@@ -164,12 +205,12 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                           children: <Widget>[
                                             new Icon(
                                               Icons.location_on,
-                                              color: themeColor,
+                                              color: widget.house.city=="Cupertino"?Colors.green:widget.house.city=="Campbell"||widget.house.city=="SanJose"||widget.house.city=="SunnyVale"||widget.house.city=="SantaClara"?Colors.blue:Colors.red
                                             ),
                                             new Padding(
                                               padding:
                                               const EdgeInsets.all(8.0),
-                                              child: new Text("15 Miles Away"),
+                                              child: new Text(widget.house.city=="Cupertino"?"2 Miles Away":widget.house.city=="Campbell"||widget.house.city=="SanJose"||widget.house.city=="SunnyVale"||widget.house.city=="SantaClara"?"6 Miles Away":"30 Miles Away"),
                                             )
                                           ],
                                         ),
@@ -180,18 +221,117 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                     padding: const EdgeInsets.only(
                                         top: 16.0, bottom: 8.0),
                                     child: new Text(
-                                      "ABOUT",
+                                      " DETAILS",
                                       style: new TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                  new Text(
-                                      "This Single-Family Home is located at 23601 McKean Rd, San Jose, CA. 23601 McKean Rd is in San Jose, CA and in ZIP Code 95141. 23601 McKean Rd has 4 beds, 2 baths, approximately 1,850 square feet and was built in 1920."),
+//                                  new Text(
+//                                      "This Single-Family Home is located at 23601 McKean Rd, San Jose, CA. 23601 McKean Rd is in San Jose, CA and in ZIP Code 95141. 23601 McKean Rd has 4 beds, 2 baths, approximately 1,850 square feet and was built in 1920.\n"),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        Icons.attach_money,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:0,left:15.0),
+                                        child:  new Text(widget.house.numBedrooms.toString()=="1"?":  \$1500":widget.house.numBedrooms.toString()=="2"?":  \$2800":widget.house.numBedrooms.toString()=="3"?":  \$3500":":  \$5000"),
+                                      )
+                                    ],
+                                  ),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        FontAwesomeIcons.bed,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:13,left:15.0),
+                                        child:  new Text("\n:  "+ widget.house.numBedrooms.toString() + " Bedrooms"),
+                                      )
+                                    ],
+                                  ),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        FontAwesomeIcons.bath,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:13,left:15.0),
+                                        child:  new Text("\n:  " + widget.house.numBathrooms.toString() + " Bathrooms"),
+                                      )
+                                    ],
+                                  ),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        FontAwesomeIcons.square,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:13,left:15.0),
+                                        child:   new Text("\n:  "+ widget.house.houseSqft.toString() + " Square Foot"),
+                                      )
+                                    ],
+                                  ),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        FontAwesomeIcons.chartArea,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:13,left:15.0),
+                                        child:new Text("\n:  "+ widget.house.lotSqft.toString() + " Lot Square Foot"),
+                                      )
+                                    ],
+                                  ),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        FontAwesomeIcons.city,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:13,left:15.0),
+                                        child: new Text("\n:  "+ widget.house.city + ", " + widget.house.state + ", " + widget.house.zipcode.toString()),
+                                      )
+                                    ],
+                                  ),
+
+                                  new Row(
+                                    children: <Widget>[
+                                      new Icon(
+                                        FontAwesomeIcons.addressCard,
+                                        color: themeColor,
+                                      ),
+                                      new Padding(
+                                        padding:
+                                        const EdgeInsets.only(bottom:13,left:15.0),
+                                        child:new Text("\n:  "+widget.house.address),
+                                      )
+                                    ],
+                                  ),
+
                                   new Container(
-                                    margin: new EdgeInsets.only(top: 25.0),
+                                    margin: new EdgeInsets.only(top: 30.0),
                                     padding: new EdgeInsets.only(
-                                        top: 5.0, bottom: 10.0),
-                                    height: 120.0,
+                                        top: 15.0, bottom: 30.0),
+                                   // height: 120.0,
                                     decoration: new BoxDecoration(
                                         color: Colors.white,
                                         border: new Border(
@@ -236,9 +376,43 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                       ],
                                     ),
                                   ),
-                                  new Container(
-                                    height: 100.0,
+
+                                  new Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children:[
+                                      new Container(
+                                        child:RaisedButton(
+                                          padding: EdgeInsets.only(top:9,bottom:9),
+                                          color:Colors.redAccent,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: new BorderRadius.circular(20.0),
+                                             // side: BorderSide(color: Colors.red)
+                                          ),
+                                          onPressed: () {
+                                            // The Yep button returns "Yep!" as the result.
+                                            Navigator.pop(context, false);
+                                          },
+                                          child: Icon(Icons.cancel,color:Colors.white,size:30),
+                                        ),
+                                      ),
+                                      new Container(
+                                        child:RaisedButton(
+                                          padding: EdgeInsets.only(top:9,bottom:9),
+                                          color:Colors.greenAccent,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: new BorderRadius.circular(20.0),
+                                            // side: BorderSide(color: Colors.red)
+                                          ),
+                                          onPressed: () {
+                                            // The Yep button returns "Yep!" as the result.
+                                            Navigator.pop(context, true);
+                                          },
+                                          child: Icon(FontAwesomeIcons.heart,color:Colors.white,size:30),
+                                        ),
+                                      ),
+                                    ]
                                   )
+
                                 ],
                               ),
                             ),
@@ -306,8 +480,9 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                 ],
               ),
             ),
-          ),
+         // ),
         ),
+        )
       ),
     );
   }
