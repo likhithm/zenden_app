@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:collection';
 import 'dart:convert' show utf8;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -55,8 +56,11 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
   bool empty;
   bool hasLoaded = false;
 
+  //Queue<String> welcomeImages = new Queue<String>();
+
   List<String> welcomeImages= List();
   int length;
+  int again;
 
   int i=0;
 
@@ -97,9 +101,10 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
       setState(() {
         for(int i=0;i<houses.length;i++){
           welcomeImages.add(houses[i].urls.split(" ")[0]);
-          //print(welcomeImages[i]);
+
         }
         length = houses.length;
+        again = length - 5;
         hasLoaded = true;
       });
 
@@ -277,9 +282,9 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                // height: MediaQuery.of(context).size.height * 0.6,
                 child: new TinderSwapCard(
                     orientation: AmassOrientation.TOP,
-                    totalNum: length,
+                    totalNum: 100,
                     stackNum: 2,
-                    swipeEdge: 4.0,
+                    swipeEdge: 1.0,
                     maxWidth: MediaQuery.of(context).size.width,
                     maxHeight: MediaQuery.of(context).size.height,
                     minWidth: MediaQuery.of(context).size.width*0.95,
@@ -287,45 +292,14 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                     cardBuilder: (context, imgIndex) => Card(
 
                       child: GestureDetector(
-                        child:Image.network('${welcomeImages[imgIndex]}',fit:BoxFit.fitHeight),
-                       /* child:CarouselSlider(
-                          // height: _appBarHeight,
-                          aspectRatio: 0.45 ,
-                          viewportFraction: 0.9,
-                          initialPage: 0,
-                          enableInfiniteScroll: false,
-                          reverse: false,
-                          autoPlay: false,
-                          autoPlayInterval: Duration(seconds:5),
-                          autoPlayAnimationDuration: Duration(milliseconds: 5000),
-                          //autoPlayCurve: Curve.,
-                          pauseAutoPlayOnTouch: Duration(seconds: 5),
-                          enlargeCenterPage: true,
-                          items: houses[imgIndex].urls.trim().split(" ").map((i) {
-                            return Builder(
-                              builder: (BuildContext context) {
-                                return Container(
-
-                                  //width: width.value,
-                                  // height: _appBarHeight,
-                                  decoration: new BoxDecoration(
-                                    image: DecorationImage(
-                                        image: new NetworkImage(
-                                            i),
-                                        fit:BoxFit.fill
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }).toList(),
-                        ),*/
-
+                       // child:Image.network('${welcomeImages[imgIndex]}',fit:BoxFit.fitHeight),
+                        child:Image.network('${welcomeImages.elementAt(imgIndex)}',fit:BoxFit.fitHeight),
                         onTap: () async {
                           bool result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DetailPage(welcomeImages[imgIndex],houses[imgIndex])
+                              // builder: (context) => DetailPage(welcomeImages[imgIndex],houses[imgIndex])
+                                builder: (context) => DetailPage(welcomeImages.elementAt(imgIndex),houses[imgIndex])
                             ),
                           );
                           if(result){
@@ -340,6 +314,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                     cardController: controller = CardController(),
                     swipeUpdateCallback:
                         (DragUpdateDetails details, Alignment align) {
+
                       /// Get swiping card's alignment
                       if (align.x < 0) {
                         //Card is LEFT swiping
@@ -349,9 +324,34 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin  {
                     },
                     swipeCompleteCallback:
                         (CardSwipeOrientation orientation, int index) {
+                        if(index==again){
+                          http
+                              .get(
+                              'https://zenden-api-heroku.herokuapp.com/api/Predictions?user_id=1')
+                              .then((res) => (res.body))
+                              .then(json.decode)
+                              .then((map) => map["data"])
+                              .then((data) => data.forEach(addHouse))
+                              .catchError(onError)
+                              .then((e) {
+                            setState(() {
+                              for(int i=length;i<houses.length;i++){
+                                welcomeImages.add(houses[i].urls.split(" ")[0]);
+                                //print(welcomeImages[i]);
+                              }
+                              //hasLoaded = true;
+                            });
+                            length = houses.length;
+                            again = length-5;
+
+
+
+                          });
+
 
                       /// Get orientation & index of swiped card!
                     }
+                   }
                 )
 
             ),
